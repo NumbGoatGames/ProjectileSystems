@@ -12,3 +12,7 @@ macOs: https://beta.unity3d.com/download/892c0f8d8f8a/UnityDownloadAssistant-201
 * Many many issues...
 * Y of projectile does not work correctly.
 * Intercept time for projectile not tested.
+
+# Licence
+Apache License 2.0
+See LICENCE file.
