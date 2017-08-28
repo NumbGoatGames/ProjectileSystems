@@ -3,12 +3,15 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace NumbGoat.Projectile {
+    /// <summary>
+    ///     Controller class for testing projectile firing.
+    /// </summary>
     public class ProjectileTestFire : MonoBehaviour {
         public BaseProjectile Projectile;
         public bool Running = true;
         public float ShootSpeed = 1f;
         public GameObject TargetGameObject;
-        public float Inaccuracy = 1.25f;
+        public float Inaccuracy = 0f;
         public bool UseNegAngle = false;
 
         public void Awake() {
@@ -39,14 +42,16 @@ namespace NumbGoat.Projectile {
         }
 
         private void FireProjectile() {
-            //TODO Projectile pool?
+            //TODO Projectile pool(?)
             Vector3 targetPosition = TrajectoryHelper.InterceptPosition(this.transform.position, Vector3.zero,
                 this.TargetGameObject.transform.position, Vector3.zero, this.ShootSpeed);
             targetPosition += this.GetRandomnessOfShot();
             float? angle = TrajectoryHelper.CalculateProjectileAngle(this.gameObject.transform.position,
                 targetPosition, this.ShootSpeed, this.UseNegAngle);
             if (angle == null) {
-                Debug.LogError(message: "Could not find angle to hit target.");
+                // if the angle couldn't be calculated, it probably means the target is too far away
+                // ie. it is impossible to hit the target with the current distance, projectile velocity and gravity
+                Debug.LogWarning(message: "Could not find angle to hit target.");
                 return;
             }
             float notNullAngle = angle.Value;
