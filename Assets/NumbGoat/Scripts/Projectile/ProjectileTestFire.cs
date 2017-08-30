@@ -10,9 +10,10 @@ namespace NumbGoat.Projectile {
         public BaseProjectile Projectile;
         public bool Running = true;
         public float ShootSpeed = 1f;
-        public GameObject TargetGameObject;
+        public GameObject[] Targets;
         public float Inaccuracy = 0f;
         public bool UseNegAngle = false;
+        private int targetCounter = 0;
 
         public void Awake() {
             Physics.IgnoreLayerCollision(8, 8);
@@ -25,7 +26,7 @@ namespace NumbGoat.Projectile {
                 return;
             }
 
-            if (this.TargetGameObject == null) {
+            if (this.Targets.Length == 0) {
                 Debug.LogError(message: "Test fire does not have a target.");
                 Destroy(this.gameObject.transform.root.gameObject);
                 return;
@@ -42,9 +43,10 @@ namespace NumbGoat.Projectile {
         }
 
         private void FireProjectile() {
+            GameObject targetGameObject = this.Targets[this.targetCounter];
             //TODO Projectile pool(?)
             Vector3 targetPosition = TrajectoryHelper.InterceptPosition(this.transform.position, Vector3.zero,
-                this.TargetGameObject.transform.position, Vector3.zero, this.ShootSpeed);
+                targetGameObject.transform.position, Vector3.zero, this.ShootSpeed);
             targetPosition += this.GetRandomnessOfShot();
             float? angle = TrajectoryHelper.CalculateProjectileAngle(this.gameObject.transform.position,
                 targetPosition, this.ShootSpeed, this.UseNegAngle);
@@ -57,13 +59,18 @@ namespace NumbGoat.Projectile {
             float notNullAngle = angle.Value;
             Debug.Log($"Got firing angle of {notNullAngle}");
             BaseProjectile toFire = Instantiate(this.Projectile);
-            toFire.Target = this.TargetGameObject;
-            toFire.gameObject.SetActive(true);
-            toFire.transform.position = this.transform.position;
-            toFire.transform.LookAt(targetPosition);
+            toFire.Target = targetGameObject; // Set the intended target of the projectile.
+            toFire.gameObject.SetActive(true); // Active the projectile (not needed if the prefab is already active).
+            toFire.transform.position = this.transform.position; // Set the position to the position of the shooter.
+            toFire.transform.LookAt(targetPosition); // Easiest way to get the projectile facing the target.
             toFire.transform.rotation = Quaternion.Euler(notNullAngle, toFire.transform.eulerAngles.y,
-                toFire.transform.eulerAngles.z);
-            toFire.Rigidbody.velocity = toFire.transform.forward * this.ShootSpeed;
+                toFire.transform.eulerAngles.z); // Look up at the correct angle.
+            toFire.Rigidbody.velocity = toFire.transform.forward * this.ShootSpeed; // Set the projectiles velocity.
+
+            if (++this.targetCounter >= this.Targets.Length) {
+                // Start from the beginning of the list again.
+                this.targetCounter = 0;
+            }
         }
 
         private Vector3 GetRandomnessOfShot() {
