@@ -149,9 +149,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8a98b790ef30414d8c97ff6be8b72d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Inaccuracy: 0
   Projectile: {fileID: 697802548}
   Running: 1
-  ShootSpeed: 22
+  ShotSpeed: 30
   Targets:
   - {fileID: 1952498797}
   - {fileID: 1913659412}
@@ -159,7 +160,6 @@ MonoBehaviour:
   - {fileID: 2010948569}
   - {fileID: 1664286722}
   - {fileID: 596724160}
-  Inaccuracy: 0
   UseNegAngle: 1
 --- !u!1 &138473148
 GameObject:
