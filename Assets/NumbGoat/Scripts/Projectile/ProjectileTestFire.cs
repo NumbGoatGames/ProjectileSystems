@@ -9,6 +9,7 @@ namespace NumbGoat.Projectile {
         public float Inaccuracy;
         public BaseProjectile Projectile;
         public bool Running = true;
+        public float ShotDelaySeconds = 0.15f;
         public float ShotSpeed = 1f;
         private int targetCounter;
         public GameObject[] Targets;
@@ -37,7 +38,7 @@ namespace NumbGoat.Projectile {
             yield return new WaitForSecondsRealtime(0.5f);
             while (this.Running) {
                 this.FireProjectile();
-                yield return new WaitForSecondsRealtime(0.25f);
+                yield return new WaitForSecondsRealtime(this.ShotDelaySeconds);
             }
         }
 
@@ -81,8 +82,25 @@ namespace NumbGoat.Projectile {
             float distance = Vector3.Distance(this.transform.position, targetTransform.position);
             float trajectoryAngle;
 
+            Vector3 targetVelocity = Vector3.zero;
+
+            // Checks for finding velocity,
+            IMoving targetGameObjectMoving = targetGameObject.GetComponent<IMoving>();
+            // in a real game you should know which of these you have so don't get them just use them.
+            if (targetGameObjectMoving != null) {
+                // Target implements IMoving, use that as the velocity.
+                Debug.Log($"Target implements IMoving");
+                targetVelocity = targetGameObjectMoving.Velocity;
+            } else {
+                Rigidbody rb = targetGameObject.GetComponent<Rigidbody>();
+                if (rb != null) {
+                    // Target has a rigidbody.
+                    targetVelocity = rb.velocity;
+                }
+            }
+
             Vector3 targetCenter = TrajectoryHelper.FirstOrderIntercept(this.transform.position, Vector3.zero,
-                this.ShotSpeed, targetTransform.position, targetTransform.GetComponent<Rigidbody>().velocity);
+                this.ShotSpeed, targetTransform.position, targetVelocity);
 
             if (TrajectoryHelper.CalculateTrajectory(distance, this.ShotSpeed, out trajectoryAngle)) {
                 float trajectoryHeight = Mathf.Tan(trajectoryAngle * Mathf.Deg2Rad) * distance;
@@ -95,7 +113,11 @@ namespace NumbGoat.Projectile {
             toFire.gameObject.SetActive(true); // Active the projectile (not needed if the prefab is already active).
             toFire.transform.position = this.transform.position; // Set the position to the position of the shooter.
             toFire.transform.LookAt(targetCenter); // Easiest way to get the projectile facing the target.
-            toFire.Rigidbody.AddRelativeForce(0, 0, this.ShotSpeed, ForceMode.Impulse);
+
+            // Set projectile in motion, could use:
+//            toFire.Rigidbody.AddRelativeForce(0, 0, this.ShotSpeed, ForceMode.Impulse);
+            // or if we wish to not have to consider mass.
+            toFire.Rigidbody.velocity = toFire.gameObject.transform.forward * this.ShotSpeed;
 
             if (++this.targetCounter >= this.Targets.Length) {
                 // Start from the beginning of the list again.

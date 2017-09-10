@@ -4,3 +4,5 @@
 /[Bb]uild/
 /[Bb]uilds/
 Packages/
+*.csproj
+.vs/

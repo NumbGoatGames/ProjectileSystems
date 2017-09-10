@@ -127,6 +127,7 @@ namespace NumbGoat.Projectile {
         #endregion
 
         #region ver2
+
         // https://forum.unity3d.com/threads/projectile-trajectory-accounting-for-gravity-velocity-mass-distance.425560/#post-2750631
 
         //first-order intercept using absolute target position

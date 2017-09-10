@@ -3,14 +3,14 @@
 namespace NumbGoat.Projectile {
     [RequireComponent(typeof(Rigidbody))]
     public abstract class BaseProjectile : MonoBehaviour {
+        protected bool Collided;
         public float Damage = 50;
+        public Vector3 MyVelocity = Vector3.zero;
         public float ProjectileLifeSeconds = 600f;
         protected float StartTime;
-        protected bool Collided = false;
-        internal Rigidbody Rigidbody => this.GetComponent<Rigidbody>();
-        public Vector3 MyVelocity = Vector3.zero;
 
         public GameObject Target;
+        internal Rigidbody Rigidbody => this.GetComponent<Rigidbody>();
 
         public virtual void Start() {
             this.StartTime = Time.time;
