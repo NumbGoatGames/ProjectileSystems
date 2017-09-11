@@ -16,12 +16,19 @@ namespace NumbGoat.Projectile {
             this.StartTime = Time.time;
         }
 
-        public virtual void Awake() { }
+        public virtual void Awake() {
+            this.gameObject.hideFlags = HideFlags.HideInHierarchy;
+        }
 
         public virtual void Update() {
             if (Time.time > this.ProjectileLifeSeconds + this.StartTime) {
                 // If we have been alive for longer than our ProjectileLifeSeconds.
                 Destroy(this.gameObject);
+            }
+
+            if (this.Rigidbody.velocity.magnitude > 1) {
+                //Point along the direction we are traveling
+                this.transform.rotation = Quaternion.LookRotation(this.Rigidbody.velocity);
             }
         }
 
@@ -30,13 +37,7 @@ namespace NumbGoat.Projectile {
         }
 
         public void FixedUpdate() {
-            // Physics effects go here.
-            this.MyVelocity = this.Rigidbody.velocity;
 
-            if (this.Rigidbody.velocity.magnitude > 1) {
-                //Point along the direction we are traveling
-                this.transform.rotation = Quaternion.LookRotation(this.Rigidbody.velocity);
-            }
         }
 
         public virtual void OnCollisionEnter(Collision c) {

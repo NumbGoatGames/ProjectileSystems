@@ -6,6 +6,7 @@ namespace NumbGoat.Projectile {
     ///     Controller class for testing projectile firing.
     /// </summary>
     public class ProjectileTestFire : MonoBehaviour {
+        private bool coRoutineRunning;
         public float Inaccuracy;
         public BaseProjectile Projectile;
         public bool Running = true;
@@ -16,6 +17,7 @@ namespace NumbGoat.Projectile {
         public bool UseNegAngle;
 
         public void Awake() {
+            // Projectiles should not collide with each other for this example.
             Physics.IgnoreLayerCollision(8, 8);
         }
 
@@ -29,53 +31,20 @@ namespace NumbGoat.Projectile {
             if (this.Targets.Length == 0) {
                 Debug.LogError(message: "Test fire does not have a target.");
                 Destroy(this.gameObject.transform.root.gameObject);
-                return;
             }
-            this.StartCoroutine(this.DoFiring());
         }
 
         public IEnumerator DoFiring() {
+            this.coRoutineRunning = true;
             yield return new WaitForSecondsRealtime(0.5f);
             while (this.Running) {
                 this.FireProjectile();
                 yield return new WaitForSecondsRealtime(this.ShotDelaySeconds);
             }
+            this.coRoutineRunning = false;
         }
 
         private void FireProjectile() {
-            #region ver1
-
-            //            GameObject targetGameObject = this.Targets[this.targetCounter];
-            //            //TODO Projectile pool(?)
-            //            Vector3 targetPosition = TrajectoryHelper.InterceptPosition(this.transform.position, Vector3.zero,
-            //                targetGameObject.transform.position, Vector3.zero, this.ShotSpeed);
-            //            targetPosition += this.GetRandomnessOfShot();
-            //            float? angle = TrajectoryHelper.CalculateProjectileAngle(this.gameObject.transform.position,
-            //                targetPosition, this.ShotSpeed, this.UseNegAngle);
-            //            if (angle == null) {
-            //                // if the angle couldn't be calculated, it probably means the target is too far away
-            //                // ie. it is impossible to hit the target with the current distance, projectile velocity and gravity
-            //                Debug.LogWarning(message: "Could not find angle to hit target.");
-            //                return;
-            //            }
-            //            float notNullAngle = angle.Value;
-            //            Debug.Log($"Got firing angle of {notNullAngle}");
-            //            BaseProjectile toFire = Instantiate(this.Projectile);
-            //            toFire.Target = targetGameObject; // Set the intended target of the projectile.
-            //            toFire.gameObject.SetActive(true); // Active the projectile (not needed if the prefab is already active).
-            //            toFire.transform.position = this.transform.position; // Set the position to the position of the shooter.
-            //            toFire.transform.LookAt(targetPosition); // Easiest way to get the projectile facing the target.
-            //            toFire.transform.rotation = Quaternion.Euler(notNullAngle, toFire.transform.eulerAngles.y,
-            //                toFire.transform.eulerAngles.z); // Look up at the correct angle.
-            //            toFire.Rigidbody.velocity = toFire.transform.forward * this.ShotSpeed; // Set the projectiles velocity.
-            //
-            //            if (++this.targetCounter >= this.Targets.Length) {
-            //                // Start from the beginning of the list again.
-            //                this.targetCounter = 0;
-            //            }
-
-            #endregion
-
             GameObject targetGameObject = this.Targets[this.targetCounter];
             Transform targetTransform = targetGameObject.transform;
 
@@ -89,7 +58,6 @@ namespace NumbGoat.Projectile {
             // in a real game you should know which of these you have so don't get them just use them.
             if (targetGameObjectMoving != null) {
                 // Target implements IMoving, use that as the velocity.
-                Debug.Log($"Target implements IMoving");
                 targetVelocity = targetGameObjectMoving.Velocity;
             } else {
                 Rigidbody rb = targetGameObject.GetComponent<Rigidbody>();
@@ -107,6 +75,8 @@ namespace NumbGoat.Projectile {
                 targetCenter.y += trajectoryHeight;
             }
 
+            targetCenter = targetCenter + this.GetRandomnessOfShot();
+
             //fire at TargetCenter
             BaseProjectile toFire = Instantiate(this.Projectile);
             toFire.Target = targetGameObject; // Set the intended target of the projectile.
@@ -122,6 +92,13 @@ namespace NumbGoat.Projectile {
             if (++this.targetCounter >= this.Targets.Length) {
                 // Start from the beginning of the list again.
                 this.targetCounter = 0;
+            }
+        }
+
+        public void Update() {
+            if (!this.coRoutineRunning && this.Running) {
+                this.StartCoroutine(this.DoFiring());
+                this.coRoutineRunning = true;
             }
         }
 

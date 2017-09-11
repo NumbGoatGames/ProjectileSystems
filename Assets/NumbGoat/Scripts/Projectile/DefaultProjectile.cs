@@ -11,6 +11,7 @@ namespace NumbGoat.Projectile {
             } else {
                 WalkingUnit otherTargetWalking = c.gameObject.GetComponent<WalkingUnit>();
                 if (otherTargetWalking != null) {
+                    this.gameObject.transform.parent = otherTargetWalking.gameObject.transform;
                     otherTargetWalking.TakeDamage(this.Damage);
                 }
             }
