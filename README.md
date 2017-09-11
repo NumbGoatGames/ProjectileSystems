@@ -14,7 +14,7 @@ macOs: https://beta.unity3d.com/download/892c0f8d8f8a/UnityDownloadAssistant-201
 GitHub:
 * Timothy Gray (TAGray)
 * Sarah Dobie (dobiewan)
-* 
+* vengefulmollusc
 
 Unity Forums:
 * [JamesLeeNZ](https://forum.unity3d.com/threads/projectile-trajectory-accounting-for-gravity-velocity-mass-distance.425560/#post-2750631)
