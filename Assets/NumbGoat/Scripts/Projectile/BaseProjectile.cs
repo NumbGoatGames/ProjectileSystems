@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
 namespace NumbGoat.Projectile {
+    /// <summary>
+    ///     Abstraction of a projectile.
+    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public abstract class BaseProjectile : MonoBehaviour {
         protected bool Collided;
@@ -27,7 +30,7 @@ namespace NumbGoat.Projectile {
             }
 
             if (this.Rigidbody.velocity.magnitude > 1) {
-                //Point along the direction we are traveling
+                // Point along the direction we are traveling
                 this.transform.rotation = Quaternion.LookRotation(this.Rigidbody.velocity);
             }
         }
@@ -44,6 +47,11 @@ namespace NumbGoat.Projectile {
             this.DoCollision(c.gameObject, c);
         }
 
+        /// <summary>
+        ///     This method is called when this projectile collides with something.
+        /// </summary>
+        /// <param name="other">Item this has collided with</param>
+        /// <param name="c">The object describing the collision</param>
         public virtual void DoCollision(GameObject other, Collision c) {
             Debug.Log($"Hit {other.name}");
             this.Collided = true;

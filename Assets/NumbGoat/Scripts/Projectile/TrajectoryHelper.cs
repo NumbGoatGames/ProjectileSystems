@@ -8,8 +8,16 @@ namespace NumbGoat.Projectile {
     /// </summary>
     public static class TrajectoryHelper {
         #region ver2
-
-        //first-order intercept using absolute target position
+        
+        /// <summary>
+        ///     Determine the first-order intercept using absolute target position.
+        /// </summary>
+        /// <param name="shooterPosition">Position of shooter</param>
+        /// <param name="shooterVelocity">Current velocity of shooter</param>
+        /// <param name="shotSpeed">Speed of the shot (projectile)</param>
+        /// <param name="targetPosition">Position of target</param>
+        /// <param name="targetVelocity">Velocity of target</param>
+        /// <returns>First order intercept</returns>
         public static Vector3 FirstOrderIntercept(Vector3 shooterPosition, Vector3 shooterVelocity, float shotSpeed,
             Vector3 targetPosition, Vector3 targetVelocity) {
             Vector3 targetRelativePosition = targetPosition - shooterPosition;
@@ -22,7 +30,13 @@ namespace NumbGoat.Projectile {
             return targetPosition + t * targetRelativeVelocity;
         }
 
-        //first-order intercept using relative target position
+        /// <summary>
+        ///     Determine the first-order intercept using relative target position.
+        /// </summary>
+        /// <param name="shotSpeed">Speed of the shot (projectile)</param>
+        /// <param name="targetRelativePosition">Position of target relative to shooter</param>
+        /// <param name="targetRelativeVelocity">Current velocity of target relative to shooter</param>
+        /// <returns>First order intercept</returns>
         public static float FirstOrderInterceptTime(float shotSpeed, Vector3 targetRelativePosition,
             Vector3 targetRelativeVelocity) {
             float velocitySquared = targetRelativeVelocity.sqrMagnitude;
@@ -62,6 +76,13 @@ namespace NumbGoat.Projectile {
             return Mathf.Max(-b / (2f * a), 0f); //don't shoot back in time
         }
 
+        /// <summary>
+        ///     Calculates the trajectory for a shot.
+        /// </summary>
+        /// <param name="targetDistance">Distance of target from shooter</param>
+        /// <param name="projectileVelocity">Speed of projectile</param>
+        /// <param name="calculatedAngle">Trajectory calculated</param>
+        /// <returns>True iff it is possible to calculate the trajectory for this situation.</returns>
         public static bool CalculateTrajectory(float targetDistance, float projectileVelocity,
             out float calculatedAngle) {
             calculatedAngle = 0.5f * (Mathf.Asin(-Physics.gravity.y * targetDistance /

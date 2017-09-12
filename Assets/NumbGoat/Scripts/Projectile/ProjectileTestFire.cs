@@ -48,36 +48,10 @@ namespace NumbGoat.Projectile {
             GameObject targetGameObject = this.Targets[this.targetCounter];
             Transform targetTransform = targetGameObject.transform;
 
-            float distance = Vector3.Distance(this.transform.position, targetTransform.position);
-            float trajectoryAngle;
+            Vector3 targetVelocity = this.FindTargetVelocity(targetGameObject);
+            Vector3 targetCenter = this.FindTargetCenter(targetTransform, targetVelocity);
 
-            Vector3 targetVelocity = Vector3.zero;
-
-            // Checks for finding velocity,
-            IMoving targetGameObjectMoving = targetGameObject.GetComponent<IMoving>();
-            // in a real game you should know which of these you have so don't get them just use them.
-            if (targetGameObjectMoving != null) {
-                // Target implements IMoving, use that as the velocity.
-                targetVelocity = targetGameObjectMoving.Velocity;
-            } else {
-                Rigidbody rb = targetGameObject.GetComponent<Rigidbody>();
-                if (rb != null) {
-                    // Target has a rigidbody.
-                    targetVelocity = rb.velocity;
-                }
-            }
-
-            Vector3 targetCenter = TrajectoryHelper.FirstOrderIntercept(this.transform.position, Vector3.zero,
-                this.ShotSpeed, targetTransform.position, targetVelocity);
-
-            if (TrajectoryHelper.CalculateTrajectory(distance, this.ShotSpeed, out trajectoryAngle)) {
-                float trajectoryHeight = Mathf.Tan(trajectoryAngle * Mathf.Deg2Rad) * distance;
-                targetCenter.y += trajectoryHeight;
-            }
-
-            targetCenter = targetCenter + this.GetRandomnessOfShot();
-
-            //fire at TargetCenter
+            // fire at TargetCenter
             BaseProjectile toFire = Instantiate(this.Projectile);
             toFire.Target = targetGameObject; // Set the intended target of the projectile.
             toFire.gameObject.SetActive(true); // Active the projectile (not needed if the prefab is already active).
@@ -93,6 +67,51 @@ namespace NumbGoat.Projectile {
                 // Start from the beginning of the list again.
                 this.targetCounter = 0;
             }
+        }
+
+        /// <summary>
+        ///     Finds point of target to aim for.
+        /// </summary>
+        /// <param name="targetTransform">Transform of the target object</param>
+        /// <param name="targetVelocity">Current velocity of the target</param>
+        /// <returns>Position of target to aim for.</returns>
+        private Vector3 FindTargetCenter(Transform targetTransform, Vector3 targetVelocity) {
+            float distance = Vector3.Distance(this.transform.position, targetTransform.position);
+            float trajectoryAngle;
+            Vector3 targetCenter = TrajectoryHelper.FirstOrderIntercept(
+                this.transform.position, Vector3.zero,
+                this.ShotSpeed, targetTransform.position, targetVelocity);
+
+            if (TrajectoryHelper.CalculateTrajectory(distance, this.ShotSpeed, out trajectoryAngle)) {
+                float trajectoryHeight = Mathf.Tan(trajectoryAngle * Mathf.Deg2Rad) * distance;
+                targetCenter.y += trajectoryHeight;
+            }
+
+            targetCenter = targetCenter + this.GetRandomnessOfShot();
+            return targetCenter;
+        }
+
+        /// <summary>
+        ///     Find the velocity of a target.
+        /// </summary>
+        /// <param name="targetGameObject">Target object</param>
+        /// <returns>Current velocity of targetGameObject.</returns>
+        private Vector3 FindTargetVelocity(GameObject targetGameObject) {
+            Vector3 targetVelocity = Vector3.zero;
+            // Checks for finding velocity,
+            IMoving targetGameObjectMoving = targetGameObject.GetComponent<IMoving>();
+            // in a real game you should know which of these you have so don't get them just use them.
+            if (targetGameObjectMoving != null) {
+                // Target implements IMoving, use that as the velocity.
+                targetVelocity = targetGameObjectMoving.Velocity;
+            } else {
+                Rigidbody rb = targetGameObject.GetComponent<Rigidbody>();
+                if (rb != null) {
+                    // Target has a rigidbody.
+                    targetVelocity = rb.velocity;
+                }
+            }
+            return targetVelocity;
         }
 
         public void Update() {

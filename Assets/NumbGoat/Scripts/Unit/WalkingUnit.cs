@@ -3,6 +3,9 @@ using UnityEngine;
 using UnityEngine.AI;
 
 namespace NumbGoat.Unit {
+    /// <summary>
+    ///     Basic walking unit.
+    /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     [RequireComponent(typeof(Rigidbody))]
     public class WalkingUnit : MonoBehaviour, IMoving {
@@ -26,7 +29,6 @@ namespace NumbGoat.Unit {
         /// <summary>
         ///     The velocity of this unit, two options: work out yourself using this example, or use navMeshAgent.velocity.
         /// </summary>
-//        public Vector3 Velocity => (this.lastPosition - this.secondLastPosition) / this.lastPositionTime;
         public Vector3 Velocity => this.navMeshAgent.velocity;
 
         public void Awake() {
@@ -53,11 +55,12 @@ namespace NumbGoat.Unit {
 
         /// <summary>
         ///     Updates the color of the unit based on its health.
+        ///     Color is in a gradient from red to green, where green is 100% health, and red is 0% health.
         /// </summary>
         private void UpdateColor() {
-            float healthCent = this.CurrentHealth / this.MaxHealth;
-            float green = 1 - healthCent;
-            float red = healthCent;
+            float healthFraction = this.CurrentHealth / this.MaxHealth;
+            float green = 1 - healthFraction;
+            float red = healthFraction;
             Color c = new Color(red, green, 0f);
             this.GetComponent<MeshRenderer>().material.color = c;
         }
@@ -98,7 +101,7 @@ namespace NumbGoat.Unit {
         /// <summary>
         ///     Make this unit take this amount of damage.
         /// </summary>
-        /// <param name="damage"></param>
+        /// <param name="damage">Damage to take</param>
         public void TakeDamage(float damage) {
             if (this.CurrentHealth - damage <= 0) {
                 // Normally do death stuff, here just prevent negative health.
