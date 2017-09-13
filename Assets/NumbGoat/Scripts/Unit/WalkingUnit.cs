@@ -20,6 +20,7 @@ namespace NumbGoat.Unit {
         private Vector3 secondLastPosition;
         public GameObject[] TargetObjects;
         public List<Vector3> Targets;
+        private float HealthRegen = 0.5f;
 
         /// <summary>
         ///     True if the unit is currently walking to targets or looking for another target.
@@ -35,8 +36,8 @@ namespace NumbGoat.Unit {
             this.navMeshAgent = this.GetComponent<NavMeshAgent>();
             this.rigidBody = this.GetComponent<Rigidbody>();
             this.lastPosition = this.gameObject.transform.position;
+            // Combine possible targets
             foreach (GameObject targetObject in this.TargetObjects) {
-                // Combine possible targets.
                 this.Targets.Add(targetObject.transform.position);
             }
         }
@@ -92,7 +93,7 @@ namespace NumbGoat.Unit {
             if (this.CurrentHealth > this.MaxHealth) {
                 this.CurrentHealth = this.MaxHealth;
             } else if (this.CurrentHealth < this.MaxHealth) {
-                this.CurrentHealth += 0.5f;
+                this.CurrentHealth += this.HealthRegen;
             }
 
             this.UpdateColor();

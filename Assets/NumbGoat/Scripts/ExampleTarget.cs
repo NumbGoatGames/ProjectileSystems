@@ -7,13 +7,14 @@ namespace NumbGoat {
     public class ExampleTarget : MonoBehaviour {
         public float CurrentHealth = 100;
         public float MaxHealth = 100;
+        public float HealthRegen = 0.1f;
 
         public void FixedUpdate() {
-            // Increment health, ensuring it is a valid value.
+            // Regen health, ensuring it is a valid value.
             if (this.CurrentHealth > this.MaxHealth) {
                 this.CurrentHealth = this.MaxHealth;
             } else if (this.CurrentHealth < this.MaxHealth) {
-                this.CurrentHealth += 0.1f;
+                this.CurrentHealth += this.HealthRegen;
             }
 
             this.UpdateColor();

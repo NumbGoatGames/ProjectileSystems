@@ -20,6 +20,7 @@ namespace NumbGoat.Projectile {
         }
 
         public virtual void Awake() {
+            // Hide from unity scene hierarchy so we don't get flooded with GameObjects
             this.gameObject.hideFlags = HideFlags.HideInHierarchy;
         }
 
