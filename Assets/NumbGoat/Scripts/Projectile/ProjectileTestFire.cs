@@ -1,21 +1,23 @@
 ﻿using System.Collections;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace NumbGoat.Projectile {
     /// <summary>
     ///     Controller class for testing projectile firing.
     /// </summary>
     public class ProjectileTestFire : MonoBehaviour {
+        private bool coRoutineRunning;
+        public float Inaccuracy;
         public BaseProjectile Projectile;
         public bool Running = true;
-        public float ShootSpeed = 1f;
+        public float ShotDelaySeconds = 0.15f;
+        public float ShotSpeed = 1f;
+        private int targetCounter;
         public GameObject[] Targets;
-        public float Inaccuracy = 0f;
-        public bool UseNegAngle = false;
-        private int targetCounter = 0;
+        public bool UseNegAngle;
 
         public void Awake() {
+            // Projectiles should not collide with each other for this example.
             Physics.IgnoreLayerCollision(8, 8);
         }
 
@@ -29,47 +31,93 @@ namespace NumbGoat.Projectile {
             if (this.Targets.Length == 0) {
                 Debug.LogError(message: "Test fire does not have a target.");
                 Destroy(this.gameObject.transform.root.gameObject);
-                return;
             }
-            this.StartCoroutine(this.DoFiring());
         }
 
         public IEnumerator DoFiring() {
+            this.coRoutineRunning = true;
             yield return new WaitForSecondsRealtime(0.5f);
             while (this.Running) {
                 this.FireProjectile();
-                yield return new WaitForSecondsRealtime(0.25f);
+                yield return new WaitForSecondsRealtime(this.ShotDelaySeconds);
             }
+            this.coRoutineRunning = false;
         }
 
         private void FireProjectile() {
             GameObject targetGameObject = this.Targets[this.targetCounter];
-            //TODO Projectile pool(?)
-            Vector3 targetPosition = TrajectoryHelper.InterceptPosition(this.transform.position, Vector3.zero,
-                targetGameObject.transform.position, Vector3.zero, this.ShootSpeed);
-            targetPosition += this.GetRandomnessOfShot();
-            float? angle = TrajectoryHelper.CalculateProjectileAngle(this.gameObject.transform.position,
-                targetPosition, this.ShootSpeed, this.UseNegAngle);
-            if (angle == null) {
-                // if the angle couldn't be calculated, it probably means the target is too far away
-                // ie. it is impossible to hit the target with the current distance, projectile velocity and gravity
-                Debug.LogWarning(message: "Could not find angle to hit target.");
-                return;
-            }
-            float notNullAngle = angle.Value;
-            Debug.Log($"Got firing angle of {notNullAngle}");
+            Transform targetTransform = targetGameObject.transform;
+
+            Vector3 targetVelocity = this.FindTargetVelocity(targetGameObject);
+            Vector3 targetCenter = this.FindTargetCenter(targetTransform, targetVelocity);
+
+            // fire at TargetCenter
             BaseProjectile toFire = Instantiate(this.Projectile);
             toFire.Target = targetGameObject; // Set the intended target of the projectile.
             toFire.gameObject.SetActive(true); // Active the projectile (not needed if the prefab is already active).
             toFire.transform.position = this.transform.position; // Set the position to the position of the shooter.
-            toFire.transform.LookAt(targetPosition); // Easiest way to get the projectile facing the target.
-            toFire.transform.rotation = Quaternion.Euler(notNullAngle, toFire.transform.eulerAngles.y,
-                toFire.transform.eulerAngles.z); // Look up at the correct angle.
-            toFire.Rigidbody.velocity = toFire.transform.forward * this.ShootSpeed; // Set the projectiles velocity.
+            toFire.transform.LookAt(targetCenter); // Easiest way to get the projectile facing the target.
+
+            // Set projectile in motion, could use:
+//            toFire.Rigidbody.AddRelativeForce(0, 0, this.ShotSpeed, ForceMode.Impulse);
+            // or if we wish to not have to consider mass.
+            toFire.Rigidbody.velocity = toFire.gameObject.transform.forward * this.ShotSpeed;
 
             if (++this.targetCounter >= this.Targets.Length) {
                 // Start from the beginning of the list again.
                 this.targetCounter = 0;
+            }
+        }
+
+        /// <summary>
+        ///     Finds point of target to aim for.
+        /// </summary>
+        /// <param name="targetTransform">Transform of the target object</param>
+        /// <param name="targetVelocity">Current velocity of the target</param>
+        /// <returns>Position of target to aim for.</returns>
+        private Vector3 FindTargetCenter(Transform targetTransform, Vector3 targetVelocity) {
+            float distance = Vector3.Distance(this.transform.position, targetTransform.position);
+            float trajectoryAngle;
+            Vector3 targetCenter = TrajectoryHelper.FirstOrderIntercept(
+                this.transform.position, Vector3.zero,
+                this.ShotSpeed, targetTransform.position, targetVelocity);
+
+            if (TrajectoryHelper.CalculateTrajectory(distance, this.ShotSpeed, out trajectoryAngle)) {
+                float trajectoryHeight = Mathf.Tan(trajectoryAngle * Mathf.Deg2Rad) * distance;
+                targetCenter.y += trajectoryHeight;
+            }
+
+            targetCenter = targetCenter + this.GetRandomnessOfShot();
+            return targetCenter;
+        }
+
+        /// <summary>
+        ///     Find the velocity of a target.
+        /// </summary>
+        /// <param name="targetGameObject">Target object</param>
+        /// <returns>Current velocity of targetGameObject.</returns>
+        private Vector3 FindTargetVelocity(GameObject targetGameObject) {
+            Vector3 targetVelocity = Vector3.zero;
+            // Checks for finding velocity,
+            IMoving targetGameObjectMoving = targetGameObject.GetComponent<IMoving>();
+            // in a real game you should know which of these you have so don't get them just use them.
+            if (targetGameObjectMoving != null) {
+                // Target implements IMoving, use that as the velocity.
+                targetVelocity = targetGameObjectMoving.Velocity;
+            } else {
+                Rigidbody rb = targetGameObject.GetComponent<Rigidbody>();
+                if (rb != null) {
+                    // Target has a rigidbody.
+                    targetVelocity = rb.velocity;
+                }
+            }
+            return targetVelocity;
+        }
+
+        public void Update() {
+            if (!this.coRoutineRunning && this.Running) {
+                this.StartCoroutine(this.DoFiring());
+                this.coRoutineRunning = true;
             }
         }
 
