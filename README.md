@@ -9,15 +9,30 @@ Windows: https://beta.unity3d.com/download/892c0f8d8f8a/UnityDownloadAssistant-2
 
 macOs: https://beta.unity3d.com/download/892c0f8d8f8a/UnityDownloadAssistant-2017.1.0p4.dmg
 
+# Usage
+Copy the NumbGoat/ProjectileSystems folder to your unity project.  
+Read the methods in TrajectoryHelper to get started.  
+
+See [NumbGoat/Scripts/ProjectileTestFire.cs](Assets/NumbGoat/Scripts/ProjectileTestFire.cs) for examples.  
+
 # Contributors
 
-GitHub:
-* Timothy Gray (TAGray)
-* Sarah Dobie (dobiewan)
-* vengefulmollusc
+### GitHub
+#### Sarah Dobie (dobiewan)
+Peer reviewing code, branch maintainence, sanity checker.
 
-Unity Forums:
-* [JamesLeeNZ](https://forum.unity3d.com/threads/projectile-trajectory-accounting-for-gravity-velocity-mass-distance.425560/#post-2750631)
+#### Timothy Gray (TAGray)
+Copying scripts from various locations, creating test scene, testing the scripts.
+
+#### Steven Morrison (ContagionNZ)
+Projectile models, other visual assets.
+
+#### vengefulmollusc
+Provided first draft of the code.
+
+### External
+#### JamesLeeNZ
+https://forum.unity3d.com/threads/projectile-trajectory-accounting-for-gravity-velocity-mass-distance.425560/#post-2750631
 
 
 # Known issues
@@ -25,6 +40,9 @@ Unity Forums:
 
 # Change log
 ```
+v1.0.1
+  - Refactored to allow easy copying of code to another project.
+  - Added IHittable
 v1.0.0
   - Working code
   - Test scene with projectiles hitting a number of test targets.

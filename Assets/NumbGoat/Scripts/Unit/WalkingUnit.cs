@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using NumbGoat.ProjectileSystems.Scripts;
+using NumbGoat.ProjectileSystems.Scripts.Projectile;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,8 +10,9 @@ namespace NumbGoat.Unit {
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     [RequireComponent(typeof(Rigidbody))]
-    public class WalkingUnit : MonoBehaviour, IMoving {
+    public class WalkingUnit : MonoBehaviour, IMoving, IHittable {
         public float CurrentHealth = 100;
+        private readonly float HealthRegen = 0.5f;
         private Vector3 lastPosition;
         private float lastPositionTime;
         public float MaxHealth = 100;
@@ -20,7 +23,6 @@ namespace NumbGoat.Unit {
         private Vector3 secondLastPosition;
         public GameObject[] TargetObjects;
         public List<Vector3> Targets;
-        private float HealthRegen = 0.5f;
 
         /// <summary>
         ///     True if the unit is currently walking to targets or looking for another target.
@@ -28,27 +30,32 @@ namespace NumbGoat.Unit {
         public bool IsActivelyWalking { get; set; } = true;
 
         /// <summary>
-        ///     The velocity of this unit, two options: work out yourself using this example, or use navMeshAgent.velocity.
+        ///     The velocity of this unit, two options: use navMeshAgent.velocity or lastPosition/secondLastPosition * lastPositionTime.
         /// </summary>
         public Vector3 Velocity => this.navMeshAgent.velocity;
+
+        /// <inheritdoc />
+        public void DoHit<T>(T hitWith) where T : BaseProjectile {
+            // When we are hit, take damage.
+            this.TakeDamage(hitWith.Damage);
+        }
 
         public void Awake() {
             this.navMeshAgent = this.GetComponent<NavMeshAgent>();
             this.rigidBody = this.GetComponent<Rigidbody>();
             this.lastPosition = this.gameObject.transform.position;
-            // Combine possible targets
+            // Combine possible targets into one list we can iterate through.
             foreach (GameObject targetObject in this.TargetObjects) {
                 this.Targets.Add(targetObject.transform.position);
             }
         }
 
         public void Start() {
+            // Do some sanity checks before we start.
             if (this.Targets.Count == 0) {
                 Debug.LogWarning(message: "No Targets set for Walking unit.");
                 this.IsActivelyWalking = false;
-                return;
-            }
-            if (!this.navMeshAgent.isOnNavMesh) {
+            } else if (!this.navMeshAgent.isOnNavMesh) {
                 Debug.Log(message: "No nav mesh under walking unit.");
                 this.IsActivelyWalking = false;
             }
@@ -56,7 +63,8 @@ namespace NumbGoat.Unit {
 
         /// <summary>
         ///     Updates the color of the unit based on its health.
-        ///     Color is in a gradient from red to green, where green is 100% health, and red is 0% health.
+        ///     Color is in a gradient from red to green, where green is 0% health, and red is 100% health. To indicate hits on targets.
+        ///     (Green = good hits)
         /// </summary>
         private void UpdateColor() {
             float healthFraction = this.CurrentHealth / this.MaxHealth;
@@ -67,7 +75,9 @@ namespace NumbGoat.Unit {
         }
 
         public void Update() {
-            this.MyVelocity = this.Velocity; // Show velocity in the editor.
+#if UNITY_EDITOR
+            this.MyVelocity = this.Velocity; // Show velocity in the editor. Don't do this in a live game. 
+#endif
             if (!this.IsActivelyWalking) {
                 return;
             }

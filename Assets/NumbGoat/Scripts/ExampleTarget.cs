@@ -1,13 +1,27 @@
-﻿using UnityEngine;
+﻿using NumbGoat.ProjectileSystems.Scripts.Projectile;
+using UnityEngine;
 
 namespace NumbGoat {
     /// <summary>
     ///     Simple implementation of a target.
     /// </summary>
-    public class ExampleTarget : MonoBehaviour {
+    public class ExampleTarget : MonoBehaviour, IHittable {
         public float CurrentHealth = 100;
-        public float MaxHealth = 100;
         public float HealthRegen = 0.1f;
+        public float MaxHealth = 100;
+
+        /// <summary>
+        ///     This unit got hit by a BaseProjectile.
+        /// </summary>
+        /// <param name="projectile">The BaseProjectile that hit us.</param>
+        public void DoHit<T>(T projectile) where T : BaseProjectile {
+            if (this.CurrentHealth - projectile.Damage <= 0) {
+                // Normally do death stuff, here just prevent negative health.
+                this.CurrentHealth = 0;
+            } else {
+                this.CurrentHealth -= projectile.Damage;
+            }
+        }
 
         public void FixedUpdate() {
             // Regen health, ensuring it is a valid value.
@@ -30,19 +44,6 @@ namespace NumbGoat {
             float red = healthCent;
             Color c = new Color(red, green, 0f);
             this.GetComponent<MeshRenderer>().material.color = c;
-        }
-
-        /// <summary>
-        ///     Make this unit take this amount of damage.
-        /// </summary>
-        /// <param name="damage">Damage to take</param>
-        public void TakeDamage(float damage) {
-            if (this.CurrentHealth - damage <= 0) {
-                // Normally do death stuff, here just prevent negative health.
-                this.CurrentHealth = 0;
-            } else {
-                this.CurrentHealth -= damage;
-            }
         }
     }
 }
