@@ -1,7 +1,9 @@
 ﻿using System.Collections;
+using NumbGoat.ProjectileSystems.Scripts;
+using NumbGoat.ProjectileSystems.Scripts.Projectile;
 using UnityEngine;
 
-namespace NumbGoat.Projectile {
+namespace NumbGoat {
     /// <summary>
     ///     Controller class for testing projectile firing.
     /// </summary>

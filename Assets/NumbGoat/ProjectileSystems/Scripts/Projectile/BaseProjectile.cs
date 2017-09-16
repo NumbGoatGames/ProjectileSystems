@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace NumbGoat.Projectile {
+namespace NumbGoat.ProjectileSystems.Scripts.Projectile {
     /// <summary>
     ///     Abstraction of a projectile.
     /// </summary>
@@ -36,14 +36,6 @@ namespace NumbGoat.Projectile {
             }
         }
 
-        public virtual void LateUpdate() {
-            // UI and Camera Updates.
-        }
-
-        public void FixedUpdate() {
-
-        }
-
         public virtual void OnCollisionEnter(Collision c) {
             this.DoCollision(c.gameObject, c);
         }
@@ -60,6 +52,8 @@ namespace NumbGoat.Projectile {
             this.Rigidbody.isKinematic = true;
             this.GetComponent<Collider>().enabled = false;
             this.transform.LookAt(other.transform.root);
+            IHittable otherTarget = c.gameObject.GetComponent<IHittable>();
+            otherTarget?.DoHit(this); // If target is IHittable then DoHit
             Destroy(this.gameObject, 2f);
         }
     }

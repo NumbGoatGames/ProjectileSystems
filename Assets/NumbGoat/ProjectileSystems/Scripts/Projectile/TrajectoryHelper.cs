@@ -1,14 +1,12 @@
 ﻿using UnityEngine;
 
-namespace NumbGoat.Projectile {
+namespace NumbGoat.ProjectileSystems.Scripts.Projectile {
     /// <summary>
     ///     Helper class for trajectory calculations.
     ///     Thanks JamesLeeNZ and other posters on this forum thread!
     ///     https://forum.unity3d.com/threads/projectile-trajectory-accounting-for-gravity-velocity-mass-distance.425560/#post-2750631
     /// </summary>
     public static class TrajectoryHelper {
-        #region ver2
-        
         /// <summary>
         ///     Determine the first-order intercept using absolute target position.
         /// </summary>
@@ -93,7 +91,5 @@ namespace NumbGoat.Projectile {
             }
             return true;
         }
-
-        #endregion
     }
 }
