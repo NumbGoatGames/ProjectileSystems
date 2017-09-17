@@ -30,9 +30,13 @@ Projectile models, other visual assets.
 #### vengefulmollusc
 Provided first draft of the code.
 
+#### benloong
+https://gist.github.com/benloong/4661336
+
 ### External
 #### JamesLeeNZ
 https://forum.unity3d.com/threads/projectile-trajectory-accounting-for-gravity-velocity-mass-distance.425560/#post-2750631
+
 
 
 # Known issues
