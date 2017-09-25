@@ -16,6 +16,7 @@ namespace NumbGoat {
         public float ShotSpeed = 1f;
         private int targetCounter;
         public GameObject[] Targets;
+        public bool UseAngleOfReach = true;
         public bool UseNegAngle;
 
         public void Awake() {
@@ -38,15 +39,23 @@ namespace NumbGoat {
 
         public IEnumerator DoFiring() {
             this.coRoutineRunning = true;
-            yield return new WaitForSecondsRealtime(0.5f);
+            yield return new WaitForSecondsRealtime(0.2f);
             while (this.Running) {
-                this.FireProjectile();
+                if (this.UseAngleOfReach) {
+                    this.FireProjectileReach();
+                } else {
+                    this.FireProjectileArtillery();
+                }
+                if (++this.targetCounter >= this.Targets.Length) {
+                    // Start from the beginning of the list again.
+                    this.targetCounter = 0;
+                }
                 yield return new WaitForSecondsRealtime(this.ShotDelaySeconds);
             }
             this.coRoutineRunning = false;
         }
 
-        private void FireProjectile() {
+        private void FireProjectileReach() {
             GameObject targetGameObject = this.Targets[this.targetCounter];
             Transform targetTransform = targetGameObject.transform;
 
@@ -64,11 +73,36 @@ namespace NumbGoat {
 //            toFire.Rigidbody.AddRelativeForce(0, 0, this.ShotSpeed, ForceMode.Impulse);
             // or if we wish to not have to consider mass.
             toFire.Rigidbody.velocity = toFire.gameObject.transform.forward * this.ShotSpeed;
+        }
 
-            if (++this.targetCounter >= this.Targets.Length) {
-                // Start from the beginning of the list again.
-                this.targetCounter = 0;
+        private void FireProjectileArtillery() {
+            GameObject targetGameObject = this.Targets[this.targetCounter];
+
+            Vector3 firingPositing = this.transform.position;
+            Vector3 targetVelocity = this.FindTargetVelocity(targetGameObject);
+            Vector3 firstOrderIntercept = TrajectoryHelper.FirstOrderIntercept(
+                this.gameObject.transform.position, Vector3.zero,
+                this.ShotSpeed, targetGameObject.transform.position, targetVelocity);
+
+            float? trajectoryAngle = TrajectoryHelper.CalcAngleOfElevation(firingPositing, firstOrderIntercept,
+                this.ShotSpeed, Physics.gravity.magnitude);
+
+            if (trajectoryAngle == null) {
+                Debug.LogError(message: "No trajectory to target.");
+                return;
             }
+            BaseProjectile toFire = Instantiate(this.Projectile); // TODO: Use projectile pool.
+            toFire.Target = targetGameObject; // Set the intended target of the projectile.
+            toFire.gameObject.SetActive(true); // Active the projectile (not needed if the prefab is already active).
+            toFire.transform.position = firingPositing; // Set the position to the position of the shooter.
+            toFire.transform.LookAt(firstOrderIntercept); // Easiest way to get the projectile facing the target.
+            toFire.transform.rotation = Quaternion.Euler(trajectoryAngle.Value, toFire.transform.eulerAngles.y,
+                toFire.transform.eulerAngles.z); // Look up by the calculated angle
+
+            toFire.Rigidbody.velocity =
+                toFire.gameObject.transform.forward * this.ShotSpeed; // Fire forward at set speed
+
+
         }
 
         /// <summary>

@@ -3,11 +3,9 @@ This is a project that shows one approach to firing physics based projectiles at
 both moving and static.
 
 # Unity Version
-This project was built using Unity 2017.1.0p4, but should work fine with most other versions
+This project was built using Unity 2017.1.1f1, but should work fine with most other versions
 
-Windows: https://beta.unity3d.com/download/892c0f8d8f8a/UnityDownloadAssistant-2017.1.0p4.exe
-
-macOs: https://beta.unity3d.com/download/892c0f8d8f8a/UnityDownloadAssistant-2017.1.0p4.dmg
+Unity versions can be found [here](https://unity3d.com/get-unity/download/archive)
 
 # Usage
 Copy the NumbGoat/ProjectileSystems folder to your unity project.  

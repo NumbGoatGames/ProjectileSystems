@@ -104,7 +104,10 @@ namespace NumbGoat.ProjectileSystems.Scripts.Projectile {
         /// <param name="posAngle">Aim up to hit target or aim across?</param>
         /// <returns></returns>
         public static float? CalcAngleOfElevation(Vector3 from, Vector3 to, float v, float g, bool posAngle = false) {
-            float x = Mathf.Abs((to - from).z);
+//            float x = Mathf.Abs((to - from).z);
+            Vector3 fromNoY = new Vector3(from.x, 0, from.z);
+            Vector3 toNoY = new Vector3(to.x, 0, to.z);
+            float x = Vector3.Distance(fromNoY, toNoY);
             float y = (to - from).y;
             float v2 = v * v;
             float v4 = v2 * v2;
@@ -118,9 +121,9 @@ namespace NumbGoat.ProjectileSystems.Scripts.Projectile {
             } else {
                 theta = -Mathf.Atan((v2 - Mathf.Sqrt(fac)) / (g * x)) * Mathf.Rad2Deg;
             }
-            while (theta < 0) {
-                theta += 360f;
-            }
+//            while (theta < 0) {
+//                theta += 360f;
+//            }
             return theta;
         }
     }
