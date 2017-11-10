@@ -78,13 +78,13 @@ namespace NumbGoat {
         private void FireProjectileArtillery() {
             GameObject targetGameObject = this.Targets[this.targetCounter];
 
-            Vector3 firingPositing = this.transform.position;
+            Vector3 firingPosition = this.transform.position;
             Vector3 targetVelocity = this.FindTargetVelocity(targetGameObject);
             Vector3 firstOrderIntercept = TrajectoryHelper.FirstOrderIntercept(
                 this.gameObject.transform.position, Vector3.zero,
                 this.ShotSpeed, targetGameObject.transform.position, targetVelocity);
 
-            float? trajectoryAngle = TrajectoryHelper.CalcAngleOfElevation(firingPositing, firstOrderIntercept,
+            float? trajectoryAngle = TrajectoryHelper.CalcAngleOfElevation(firingPosition, firstOrderIntercept,
                 this.ShotSpeed, Physics.gravity.magnitude);
 
             if (trajectoryAngle == null) {
@@ -94,7 +94,7 @@ namespace NumbGoat {
             BaseProjectile toFire = Instantiate(this.Projectile); // TODO: Use projectile pool.
             toFire.Target = targetGameObject; // Set the intended target of the projectile.
             toFire.gameObject.SetActive(true); // Active the projectile (not needed if the prefab is already active).
-            toFire.transform.position = firingPositing; // Set the position to the position of the shooter.
+            toFire.transform.position = firingPosition; // Set the position to the position of the shooter.
             toFire.transform.LookAt(firstOrderIntercept); // Easiest way to get the projectile facing the target.
             toFire.transform.rotation = Quaternion.Euler(trajectoryAngle.Value, toFire.transform.eulerAngles.y,
                 toFire.transform.eulerAngles.z); // Look up by the calculated angle
