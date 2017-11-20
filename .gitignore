@@ -6,3 +6,4 @@
 Packages/
 *.csproj
 .vs/
+ProjectileSystems.csproj.DotSettings

@@ -91,5 +91,40 @@ namespace NumbGoat.ProjectileSystems.Scripts.Projectile {
             }
             return true;
         }
+
+        
+        /// <summary>
+        ///     Use the Artillery formula to return an angle to hit the target.
+        ///     Based on https://gist.github.com/benloong/4661336
+        /// </summary>
+        /// <param name="from">Where we are shooting from</param>
+        /// <param name="to">What we are aiming at</param>
+        /// <param name="v">The velocity of the projectile</param>
+        /// <param name="g">Gravity,</param>
+        /// <param name="posAngle">Aim up to hit target or aim across?</param>
+        /// <returns></returns>
+        public static float? CalcAngleOfElevation(Vector3 from, Vector3 to, float v, float g, bool posAngle = false) {
+//            float x = Mathf.Abs((to - from).z);
+            Vector3 fromNoY = new Vector3(from.x, 0, from.z);
+            Vector3 toNoY = new Vector3(to.x, 0, to.z);
+            float x = Vector3.Distance(fromNoY, toNoY);
+            float y = (to - from).y;
+            float v2 = v * v;
+            float v4 = v2 * v2;
+            float fac = v4 - g * (g * x * x + 2 * y * v2);
+            if (fac < 0) {
+                return null; // No angle
+            }
+            float theta = 0;
+            if (posAngle) {
+                theta = -Mathf.Atan((v2 + Mathf.Sqrt(fac)) / (g * x)) * Mathf.Rad2Deg;
+            } else {
+                theta = -Mathf.Atan((v2 - Mathf.Sqrt(fac)) / (g * x)) * Mathf.Rad2Deg;
+            }
+//            while (theta < 0) {
+//                theta += 360f;
+//            }
+            return theta;
+        }
     }
 }
