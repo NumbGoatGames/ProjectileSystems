@@ -4,3 +4,6 @@
 /[Bb]uild/
 /[Bb]uilds/
 Packages/
+*.csproj
+.vs/
+ProjectileSystems.csproj.DotSettings
